@@ -1,15 +1,46 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Focus Quran</title>
-    <link rel="manifest" href="/manifest.json">
+    <meta name="description" content="A focused Quran reading experience with one ayah at a time" />
+    <meta name="author" content="Lovable" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1e3a8a" />
+    <link rel="apple-touch-icon" href="/quran-icon-192.png" />
+    
+    <meta property="og:title" content="Focus Quran" />
+    <meta property="og:description" content="A focused Quran reading experience with one ayah at a time" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Add Google Fonts for Arabic support -->
     <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      @font-face {
+        font-family: 'Arabic';
+        src: url('https://cdn.jsdelivr.net/npm/scheherazade-web@0.0.1/fonts/ScheherazadeNew-Regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+      
+      .font-arabic {
+        font-family: 'Scheherazade New', 'Arabic', serif;
+      }
+    </style>
   </head>
+
   <body>
     <div id="root"></div>
+    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -108,9 +109,6 @@ export default {
 			},
 			backdropBlur: {
 				xs: '2px',
-			},
-			fontFamily: {
-				'arabic-title': ['Scheherazade New', 'serif'],
 			}
 		}
 	},

@@ -12,13 +12,8 @@ import {
 } from '@/components/ui/sheet';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
-interface SettingsPanelProps {
-  className?: string;
-}
-
-const SettingsPanel: React.FC<SettingsPanelProps> = ({ className }) => {
+const SettingsPanel: React.FC = () => {
   const { settings, updateSettings } = useQuran();
 
   return (
@@ -27,7 +22,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ className }) => {
         <Button 
           variant="outline" 
           size="icon" 
-          className={cn("btn-glass", className)}
+          className="btn-glass absolute top-4 right-4"
         >
           <Settings size={20} />
         </Button>

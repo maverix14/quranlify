@@ -45,16 +45,13 @@ const Index = () => {
   return (
     <QuranProvider>
       <div className="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6">
-        <header className="w-full max-w-2xl mx-auto mb-6 text-center flex flex-col items-center justify-center space-y-2">
-          <InstallButton className="self-start absolute left-4 top-4" />
-          <SettingsPanel className="self-end absolute right-4 top-4" />
-          
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-quran-blue font-arabic-title tracking-wide shadow-sm">
-              Focus Quran
-            </h1>
-            <p className="text-sm text-gray-600 italic">One ayah at a time</p>
+        <header className="w-full max-w-2xl mx-auto mb-6 text-center flex justify-between items-center">
+          <InstallButton />
+          <div>
+            <h1 className="text-2xl font-semibold text-quran-blue">Focus Quran</h1>
+            <p className="text-sm text-gray-600">One ayah at a time</p>
           </div>
+          <SettingsPanel />
         </header>
         
         <main className="flex-1 w-full flex flex-col items-center justify-center mb-6">
