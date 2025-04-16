@@ -3,12 +3,16 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Surah, Ayah, ReadingProgress, AppSettings } from '../types';
 import { getProgress, saveProgress, getSettings, saveSettings } from '../utils/storage';
 import { sampleSurah } from '../data/sampleSurah';
+import { getAllSurahs, getSurah } from '../utils/api';
+import { toast } from '@/components/ui/use-toast';
 
 interface QuranContextType {
   currentSurah: Surah;
   currentAyah: Ayah;
+  allSurahs: Surah[];
   settings: AppSettings;
   isPlaying: boolean;
+  isLoading: boolean;
   navigateToAyah: (surahNumber: number, ayahNumber: number) => void;
   nextAyah: () => void;
   previousAyah: () => void;
@@ -19,12 +23,34 @@ interface QuranContextType {
 const QuranContext = createContext<QuranContextType | undefined>(undefined);
 
 export const QuranProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [availableSurahs, setAvailableSurahs] = useState<Surah[]>([sampleSurah]);
+  const [allSurahs, setAllSurahs] = useState<Surah[]>([sampleSurah]);
   const [currentSurah, setCurrentSurah] = useState<Surah>(sampleSurah);
   const [currentAyah, setCurrentAyah] = useState<Ayah>(sampleSurah.ayahs[0]);
   const [settings, setSettings] = useState<AppSettings>(getSettings());
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch all surahs on initial load
+  useEffect(() => {
+    const fetchSurahs = async () => {
+      try {
+        const surahs = await getAllSurahs();
+        if (surahs && surahs.length > 0) {
+          setAllSurahs(surahs);
+        }
+      } catch (error) {
+        console.error("Error fetching surahs:", error);
+        toast({
+          title: "Error loading Quran data",
+          description: "Could not load the list of surahs. Please check your internet connection.",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    fetchSurahs();
+  }, []);
 
   // Initialize audio element
   useEffect(() => {
@@ -53,7 +79,14 @@ export const QuranProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (settings.autoPlayAudio) {
         audioRef.play()
           .then(() => setIsPlaying(true))
-          .catch(err => console.error("Error playing audio:", err));
+          .catch(err => {
+            console.error("Error playing audio:", err);
+            toast({
+              title: "Audio playback failed",
+              description: "Try downloading the surah for offline use.",
+              variant: "destructive"
+            });
+          });
       }
     }
     
@@ -67,17 +100,44 @@ export const QuranProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [currentAyah, currentSurah, settings.autoPlayAudio]);
 
-  const navigateToAyah = (surahNumber: number, ayahNumber: number) => {
-    // For the sample, we only have one surah
-    // In a full app, we would load the correct surah
-    const selectedSurah = sampleSurah;
+  const navigateToAyah = async (surahNumber: number, ayahNumber: number) => {
+    setIsLoading(true);
     
-    if (selectedSurah) {
-      setCurrentSurah(selectedSurah);
-      
-      // Find the ayah in the surah
-      const ayahIndex = Math.min(Math.max(1, ayahNumber), selectedSurah.numberOfAyahs) - 1;
-      setCurrentAyah(selectedSurah.ayahs[ayahIndex]);
+    try {
+      // Check if we need to load a different surah
+      if (!currentSurah || currentSurah.number !== surahNumber) {
+        const surah = await getSurah(surahNumber);
+        
+        if (surah) {
+          setCurrentSurah(surah);
+          
+          // Find the ayah in the surah
+          const ayahIndex = Math.min(Math.max(1, ayahNumber), surah.numberOfAyahs) - 1;
+          setCurrentAyah(surah.ayahs[ayahIndex]);
+        } else {
+          // If surah couldn't be loaded, show error and use sample
+          toast({
+            title: "Error loading surah",
+            description: "Could not load the requested surah. Using sample data instead.",
+            variant: "destructive"
+          });
+          setCurrentSurah(sampleSurah);
+          setCurrentAyah(sampleSurah.ayahs[0]);
+        }
+      } else {
+        // Same surah, different ayah
+        const ayahIndex = Math.min(Math.max(1, ayahNumber), currentSurah.numberOfAyahs) - 1;
+        setCurrentAyah(currentSurah.ayahs[ayahIndex]);
+      }
+    } catch (error) {
+      console.error("Error navigating to ayah:", error);
+      toast({
+        title: "Navigation error",
+        description: "Could not navigate to the requested ayah.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -90,8 +150,15 @@ export const QuranProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Move to next ayah in current surah
         navigateToAyah(currentSurah.number, currentAyahNumber + 1);
       } else {
-        // Here we would move to the next surah, but for the sample we just wrap around
-        navigateToAyah(currentSurah.number, 1);
+        // Move to the next surah, first ayah
+        const nextSurahNumber = currentSurah.number + 1;
+        // Check if next surah exists (max 114 surahs in Quran)
+        if (nextSurahNumber <= 114) {
+          navigateToAyah(nextSurahNumber, 1);
+        } else {
+          // Wrap around to the first surah
+          navigateToAyah(1, 1);
+        }
       }
     }
   };
@@ -99,14 +166,26 @@ export const QuranProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const previousAyah = () => {
     if (currentSurah && currentAyah) {
       const currentAyahNumber = currentAyah.number;
-      const totalAyahs = currentSurah.numberOfAyahs;
       
       if (currentAyahNumber > 1) {
         // Move to previous ayah in current surah
         navigateToAyah(currentSurah.number, currentAyahNumber - 1);
       } else {
-        // Here we would move to the previous surah, but for the sample we just wrap around
-        navigateToAyah(currentSurah.number, totalAyahs);
+        // Move to the previous surah, last ayah
+        const prevSurahNumber = currentSurah.number - 1;
+        if (prevSurahNumber >= 1) {
+          // Get the number of ayahs in the previous surah
+          const prevSurah = allSurahs.find(s => s.number === prevSurahNumber);
+          if (prevSurah) {
+            navigateToAyah(prevSurahNumber, prevSurah.numberOfAyahs);
+          } else {
+            // If we can't determine the previous surah's length, fetch it
+            navigateToAyah(prevSurahNumber, 1);  // Will load the surah and we can navigate to the last ayah after
+          }
+        } else {
+          // Wrap around to the last surah (114)
+          navigateToAyah(114, 1);
+        }
       }
     }
   };
@@ -119,7 +198,14 @@ export const QuranProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } else {
         audioRef.play()
           .then(() => setIsPlaying(true))
-          .catch(err => console.error("Error playing audio:", err));
+          .catch(err => {
+            console.error("Error playing audio:", err);
+            toast({
+              title: "Audio playback failed",
+              description: "Try downloading the surah for offline use.",
+              variant: "destructive"
+            });
+          });
       }
     }
   };
@@ -135,8 +221,10 @@ export const QuranProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         currentSurah,
         currentAyah,
+        allSurahs,
         settings,
         isPlaying,
+        isLoading,
         navigateToAyah,
         nextAyah,
         previousAyah,

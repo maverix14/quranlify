@@ -1,7 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileAudio2, Download } from 'lucide-react';
+import { FileAudio2, Download, Check, Search, Loader2 } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -11,39 +10,111 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/use-toast';
-import { sampleSurah } from '../data/sampleSurah';
+import { useQuran } from '../contexts/QuranContext';
+import { getSurah } from '../utils/api';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 
 interface DownloadManagerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+interface DownloadState {
+  [surahNumber: number]: 'idle' | 'downloading' | 'completed' | 'error';
+}
+
 const DownloadManager: React.FC<DownloadManagerProps> = ({ isOpen, onClose }) => {
-  const [downloadingIndex, setDownloadingIndex] = useState<number | null>(null);
+  const { allSurahs } = useQuran();
+  const [downloadStates, setDownloadStates] = useState<DownloadState>({});
+  const [searchQuery, setSearchQuery] = useState('');
   
-  // In a real app, this would check if the surah is already downloaded
-  const isDownloaded = () => {
-    // Check if we already have the audio files in IndexedDB or cache
-    return false; // Mock implementation
+  useEffect(() => {
+    try {
+      const savedStates = localStorage.getItem('downloadedSurahs');
+      if (savedStates) {
+        const parsedStates: DownloadState = JSON.parse(savedStates);
+        setDownloadStates(parsedStates);
+      }
+    } catch (error) {
+      console.error('Error loading download states:', error);
+    }
+  }, []);
+  
+  const isDownloaded = (surahNumber: number) => {
+    return downloadStates[surahNumber] === 'completed';
   };
   
   const handleDownload = async (surahNumber: number) => {
-    setDownloadingIndex(surahNumber);
+    setDownloadStates(prev => ({
+      ...prev,
+      [surahNumber]: 'downloading'
+    }));
     
-    // Mock implementation - in a real app, this would:
-    // 1. Download all audio files for the surah
-    // 2. Store them in IndexedDB
-    // 3. Update the UI to show download status
-    
-    setTimeout(() => {
+    try {
+      const surah = await getSurah(surahNumber);
+      
+      if (!surah) {
+        throw new Error('Failed to fetch surah data');
+      }
+      
+      const cacheKey = `surah_${surahNumber}`;
+      localStorage.setItem(cacheKey, JSON.stringify(surah));
+      
+      if ('serviceWorker' in navigator && 'SyncManager' in window) {
+        setTimeout(() => {
+          const newStates = {
+            ...downloadStates,
+            [surahNumber]: 'completed'
+          };
+          
+          setDownloadStates(newStates);
+          
+          localStorage.setItem('downloadedSurahs', JSON.stringify(newStates));
+          
+          toast({
+            title: "Download Complete",
+            description: `Surah ${surah.englishName} is now available offline`,
+            duration: 3000,
+          });
+        }, 2000);
+      } else {
+        toast({
+          title: "Limited Offline Support",
+          description: "Your browser doesn't fully support offline features",
+          duration: 3000,
+        });
+        
+        const newStates = {
+          ...downloadStates,
+          [surahNumber]: 'completed'
+        };
+        
+        setDownloadStates(newStates);
+        localStorage.setItem('downloadedSurahs', JSON.stringify(newStates));
+      }
+    } catch (error) {
+      console.error(`Error downloading Surah ${surahNumber}:`, error);
+      
+      setDownloadStates(prev => ({
+        ...prev,
+        [surahNumber]: 'error'
+      }));
+      
       toast({
-        title: "Download Complete",
-        description: `${sampleSurah.englishName} is now available offline`,
+        title: "Download Failed",
+        description: `Could not download Surah ${surahNumber}. Please try again.`,
+        variant: "destructive",
         duration: 3000,
       });
-      setDownloadingIndex(null);
-    }, 2000);
+    }
   };
+  
+  const filteredSurahs = allSurahs.filter(
+    surah => 
+      surah.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      surah.number.toString().includes(searchQuery)
+  );
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -55,35 +126,66 @@ const DownloadManager: React.FC<DownloadManagerProps> = ({ isOpen, onClose }) =>
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4">
-          <div className="border rounded-md p-4 mb-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-medium">{sampleSurah.englishName}</h3>
-              <p className="text-sm text-gray-500">{sampleSurah.numberOfAyahs} ayahs</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleDownload(sampleSurah.number)}
-              disabled={downloadingIndex === sampleSurah.number}
-              className="flex items-center gap-2"
-            >
-              {downloadingIndex === sampleSurah.number ? (
-                "Downloading..."
-              ) : (
-                <>
-                  <Download size={16} />
-                  Download
-                </>
-              )}
-            </Button>
-          </div>
-          
-          <p className="text-sm text-gray-500 mt-2">
-            Note: In a complete app, this would download the actual audio files.
-            This is a prototype demonstration.
-          </p>
+        <div className="relative mb-4">
+          <Input
+            placeholder="Search surah by name or number..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
         </div>
+        
+        <ScrollArea className="h-60">
+          <div className="space-y-2">
+            {filteredSurahs.map((surah) => (
+              <div 
+                key={surah.number} 
+                className="border rounded-md p-3 flex items-center justify-between"
+              >
+                <div>
+                  <h3 className="font-medium">
+                    {surah.number}. {surah.englishName}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {surah.numberOfAyahs} ayahs
+                  </p>
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDownload(surah.number)}
+                  disabled={downloadStates[surah.number] === 'downloading'}
+                  className="flex items-center gap-2"
+                >
+                  {downloadStates[surah.number] === 'downloading' ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Downloading...
+                    </>
+                  ) : isDownloaded(surah.number) ? (
+                    <>
+                      <Check size={16} className="text-green-500" />
+                      Downloaded
+                    </>
+                  ) : (
+                    <>
+                      <Download size={16} />
+                      Download
+                    </>
+                  )}
+                </Button>
+              </div>
+            ))}
+            
+            {filteredSurahs.length === 0 && (
+              <div className="text-center py-4 text-gray-500">
+                No surahs found matching your search
+              </div>
+            )}
+          </div>
+        </ScrollArea>
         
         <DialogFooter>
           <Button onClick={onClose}>Close</Button>

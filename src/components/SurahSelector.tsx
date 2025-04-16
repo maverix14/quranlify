@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuran } from '../contexts/QuranContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { sampleSurah } from '../data/sampleSurah';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Search } from 'lucide-react';
 
 interface SurahSelectorProps {
   isOpen: boolean;
@@ -12,17 +13,28 @@ interface SurahSelectorProps {
 }
 
 const SurahSelector: React.FC<SurahSelectorProps> = ({ isOpen, onClose }) => {
-  const { navigateToAyah, currentSurah, currentAyah } = useQuran();
+  const { navigateToAyah, currentSurah, currentAyah, allSurahs, isLoading } = useQuran();
   const [selectedSurah, setSelectedSurah] = useState(currentSurah.number);
   const [selectedAyah, setSelectedAyah] = useState(currentAyah.number);
+  const [searchQuery, setSearchQuery] = useState('');
   
-  // In a full app, this would be a list of all surahs
-  const surahList = [sampleSurah];
+  // Update selected values when current surah/ayah changes
+  useEffect(() => {
+    setSelectedSurah(currentSurah.number);
+    setSelectedAyah(currentAyah.number);
+  }, [currentSurah.number, currentAyah.number]);
   
   const handleGo = () => {
     navigateToAyah(selectedSurah, selectedAyah);
     onClose();
   };
+
+  // Filter surahs based on search query
+  const filteredSurahs = allSurahs.filter(
+    surah => 
+      surah.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      surah.number.toString().includes(searchQuery)
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -31,24 +43,40 @@ const SurahSelector: React.FC<SurahSelectorProps> = ({ isOpen, onClose }) => {
           <DialogTitle>Jump to Surah/Ayah</DialogTitle>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="surah" className="text-right">
-              Surah
-            </label>
-            <select 
-              id="surah" 
-              className="col-span-3 p-2 rounded border" 
-              value={selectedSurah}
-              onChange={(e) => setSelectedSurah(Number(e.target.value))}
-            >
-              {surahList.map((surah) => (
-                <option key={surah.number} value={surah.number}>
-                  {surah.number}. {surah.englishName}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="relative mb-4">
+          <Input
+            placeholder="Search surah by name or number..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+        </div>
+        
+        <div className="grid gap-4">
+          <ScrollArea className="h-60 rounded-md border">
+            <div className="p-4">
+              {filteredSurahs.length > 0 ? (
+                filteredSurahs.map((surah) => (
+                  <div 
+                    key={surah.number}
+                    className={`p-2 mb-1 rounded cursor-pointer hover:bg-blue-50 ${
+                      selectedSurah === surah.number ? 'bg-blue-100' : ''
+                    }`}
+                    onClick={() => setSelectedSurah(surah.number)}
+                  >
+                    <div className="flex justify-between">
+                      <span>{surah.number}. {surah.englishName}</span>
+                      <span className="text-gray-600 text-sm">{surah.numberOfAyahs} ayahs</span>
+                    </div>
+                    <div className="text-xs text-gray-500">{surah.englishNameTranslation}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500">No surahs found</div>
+              )}
+            </div>
+          </ScrollArea>
           
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="ayah" className="text-right">
@@ -59,12 +87,12 @@ const SurahSelector: React.FC<SurahSelectorProps> = ({ isOpen, onClose }) => {
                 id="ayah"
                 type="number"
                 min={1}
-                max={sampleSurah.numberOfAyahs}
+                max={allSurahs.find(s => s.number === selectedSurah)?.numberOfAyahs || 1}
                 value={selectedAyah}
                 onChange={(e) => setSelectedAyah(Number(e.target.value))}
               />
               <p className="text-xs text-gray-500 mt-1">
-                (1-{sampleSurah.numberOfAyahs})
+                (1-{allSurahs.find(s => s.number === selectedSurah)?.numberOfAyahs || '...'})
               </p>
             </div>
           </div>
@@ -74,8 +102,9 @@ const SurahSelector: React.FC<SurahSelectorProps> = ({ isOpen, onClose }) => {
           <Button 
             variant="default" 
             onClick={handleGo}
+            disabled={isLoading}
           >
-            Go
+            {isLoading ? 'Loading...' : 'Go'}
           </Button>
         </div>
       </DialogContent>

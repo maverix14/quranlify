@@ -1,9 +1,19 @@
 
 import React from 'react';
 import { useQuran } from '../contexts/QuranContext';
+import { Loader2 } from 'lucide-react';
 
 const AyahDisplay: React.FC = () => {
-  const { currentSurah, currentAyah, settings } = useQuran();
+  const { currentSurah, currentAyah, settings, isLoading } = useQuran();
+
+  if (isLoading) {
+    return (
+      <div className="glass-card p-6 w-full max-w-2xl mx-auto flex flex-col items-center justify-center" style={{ minHeight: '300px' }}>
+        <Loader2 className="h-12 w-12 animate-spin text-quran-blue" />
+        <p className="mt-4 text-gray-600">Loading ayah...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="glass-card p-6 w-full max-w-2xl mx-auto animate-fade-in">
