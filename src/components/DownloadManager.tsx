@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileAudio2, Download, Check, Search, Loader2 } from 'lucide-react';
@@ -63,14 +64,17 @@ const DownloadManager: React.FC<DownloadManagerProps> = ({ isOpen, onClose }) =>
       
       if ('serviceWorker' in navigator && 'SyncManager' in window) {
         setTimeout(() => {
-          const newStates = {
+          // Fix here: Ensure we're updating with the correct type
+          setDownloadStates(prevStates => ({
+            ...prevStates,
+            [surahNumber]: 'completed' as const
+          }));
+          
+          // Fix here: Ensure we're saving with the correct type
+          localStorage.setItem('downloadedSurahs', JSON.stringify({
             ...downloadStates,
             [surahNumber]: 'completed'
-          };
-          
-          setDownloadStates(newStates);
-          
-          localStorage.setItem('downloadedSurahs', JSON.stringify(newStates));
+          }));
           
           toast({
             title: "Download Complete",
@@ -85,20 +89,23 @@ const DownloadManager: React.FC<DownloadManagerProps> = ({ isOpen, onClose }) =>
           duration: 3000,
         });
         
-        const newStates = {
+        // Fix here: Ensure we're updating with the correct type
+        setDownloadStates(prevStates => ({
+          ...prevStates,
+          [surahNumber]: 'completed' as const
+        }));
+        
+        localStorage.setItem('downloadedSurahs', JSON.stringify({
           ...downloadStates,
           [surahNumber]: 'completed'
-        };
-        
-        setDownloadStates(newStates);
-        localStorage.setItem('downloadedSurahs', JSON.stringify(newStates));
+        }));
       }
     } catch (error) {
       console.error(`Error downloading Surah ${surahNumber}:`, error);
       
       setDownloadStates(prev => ({
         ...prev,
-        [surahNumber]: 'error'
+        [surahNumber]: 'error' as const
       }));
       
       toast({
