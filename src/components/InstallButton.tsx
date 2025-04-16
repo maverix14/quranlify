@@ -1,15 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
+
+interface InstallButtonProps {
+  className?: string;
+}
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const InstallButton: React.FC = () => {
+const InstallButton: React.FC<InstallButtonProps> = ({ className }) => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   
@@ -64,7 +68,7 @@ const InstallButton: React.FC = () => {
     <Button 
       variant="outline" 
       size="icon" 
-      className="btn-glass" 
+      className={cn("btn-glass", className)} 
       onClick={handleInstallClick}
     >
       <Download size={20} />
