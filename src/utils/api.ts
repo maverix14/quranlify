@@ -1,7 +1,7 @@
 
 import { Surah, Ayah } from '../types';
 
-const BASE_URL = 'https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1';
+const BASE_URL = 'https://raw.githubusercontent.com/fawazahmed0/quran-api/main';
 
 // Get list of all Surahs (chapters)
 export const getAllSurahs = async (): Promise<Surah[]> => {

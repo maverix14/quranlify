@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useQuran } from '../contexts/QuranContext';
-import { Play, Pause, SkipBack, SkipForward, X, List, FileAudio2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, List, FileAudio2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DownloadManager from './DownloadManager';
 
@@ -15,7 +15,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({ onOpenSurahList
 
   return (
     <>
-      <div className="glass-card p-4 flex justify-center space-x-4 w-full max-w-md mx-auto mt-6">
+      <div className="glass-card p-4 flex justify-center space-x-4 w-full max-w-md mx-auto">
         <Button 
           variant="outline" 
           size="icon" 
@@ -59,15 +59,6 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({ onOpenSurahList
           onClick={() => setIsDownloadOpen(true)}
         >
           <FileAudio2 size={20} />
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="btn-glass" 
-          onClick={() => window.close()}
-        >
-          <X size={20} />
         </Button>
       </div>
       

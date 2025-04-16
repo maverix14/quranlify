@@ -25,7 +25,7 @@ const AyahDisplay: React.FC = () => {
       
       <div 
         className="text-right mb-6 leading-loose" 
-        style={{ fontSize: `${1.5 * settings.fontSize}rem` }}
+        style={{ fontSize: `${3 * settings.fontSize}rem` }}
       >
         <p className="font-arabic">{currentAyah.text}</p>
       </div>

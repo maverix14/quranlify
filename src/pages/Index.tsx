@@ -44,25 +44,28 @@ const Index = () => {
 
   return (
     <QuranProvider>
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
-        <header className="w-full max-w-2xl mx-auto mb-6 text-center">
-          <h1 className="text-2xl font-semibold text-quran-blue">Focus Quran</h1>
-          <p className="text-sm text-gray-600">One ayah at a time</p>
+      <div className="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6">
+        <header className="w-full max-w-2xl mx-auto mb-6 text-center flex justify-between items-center">
+          <InstallButton />
+          <div>
+            <h1 className="text-2xl font-semibold text-quran-blue">Focus Quran</h1>
+            <p className="text-sm text-gray-600">One ayah at a time</p>
+          </div>
+          <SettingsPanel />
         </header>
         
-        <main className="flex-1 w-full flex flex-col items-center justify-center">
+        <main className="flex-1 w-full flex flex-col items-center justify-center mb-6">
           <AyahDisplay />
-          <NavigationControls onOpenSurahList={handleOpenSurahList} />
         </main>
+        
+        <footer className="w-full">
+          <NavigationControls onOpenSurahList={handleOpenSurahList} />
+        </footer>
         
         <SurahSelector 
           isOpen={isSurahSelectorOpen} 
           onClose={() => setSurahSelectorOpen(false)} 
         />
-        
-        <SettingsPanel />
-        
-        <InstallButton />
       </div>
       <Toaster />
     </QuranProvider>

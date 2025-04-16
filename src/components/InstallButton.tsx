@@ -61,15 +61,14 @@ const InstallButton: React.FC = () => {
   if (isStandalone) return null;
   
   return (
-    <div className="w-full max-w-md mx-auto mt-6 text-center">
-      <Button 
-        onClick={handleInstallClick}
-        className="glass-card flex items-center gap-2"
-      >
-        <Download size={18} />
-        Install App for Offline Use
-      </Button>
-    </div>
+    <Button 
+      variant="outline" 
+      size="icon" 
+      className="btn-glass" 
+      onClick={handleInstallClick}
+    >
+      <Download size={20} />
+    </Button>
   );
 };
 
