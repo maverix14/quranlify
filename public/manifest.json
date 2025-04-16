@@ -1,0 +1,22 @@
+
+{
+  "name": "Focus Quran",
+  "short_name": "Focus Quran",
+  "description": "A focused Quran reading experience with one ayah at a time",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "quran-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "quran-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
