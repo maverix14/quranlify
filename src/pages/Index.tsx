@@ -5,19 +5,15 @@ import AyahDisplay from '../components/AyahDisplay';
 import NavigationControls from '../components/NavigationControls';
 import SurahSelector from '../components/SurahSelector';
 import SettingsPanel from '../components/SettingsPanel';
+import InstallButton from '../components/InstallButton';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const [isSurahSelectorOpen, setSurahSelectorOpen] = useState(false);
-  const [installedPWA, setInstalledPWA] = useState(false);
   
-  // Check if the app is installed as PWA
+  // Show welcome message once per session
   useEffect(() => {
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    setInstalledPWA(isStandalone);
-    
-    // Show welcome message once per session
     const hasShownWelcome = sessionStorage.getItem('welcomed');
     if (!hasShownWelcome) {
       toast({
@@ -66,14 +62,7 @@ const Index = () => {
         
         <SettingsPanel />
         
-        {!installedPWA && (
-          <div className="w-full max-w-md mx-auto mt-6 text-center text-sm text-gray-600">
-            <p>
-              Install this app on your device for offline use.
-              Add to home screen from your browser menu.
-            </p>
-          </div>
-        )}
+        <InstallButton />
       </div>
       <Toaster />
     </QuranProvider>
