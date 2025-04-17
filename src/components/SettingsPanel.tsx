@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { useQuran } from '../contexts/QuranContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { Moon, Sun } from 'lucide-react';
 import { 
   Sheet, 
   SheetContent, 
@@ -20,6 +21,7 @@ interface SettingsPanelProps {
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ className }) => {
   const { settings, updateSettings } = useQuran();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Sheet>
@@ -41,6 +43,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ className }) => {
         </SheetHeader>
         
         <div className="grid gap-6 py-6">
+          <div className="flex items-center justify-between">
+            <label htmlFor="theme" className="text-sm font-medium flex items-center gap-2">
+              {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+              Dark Mode
+            </label>
+            <Switch
+              id="theme"
+              checked={theme === 'dark'}
+              onCheckedChange={toggleTheme}
+            />
+          </div>
+          
           <div className="flex items-center justify-between">
             <label htmlFor="auto-play" className="text-sm font-medium">
               Auto-play Audio

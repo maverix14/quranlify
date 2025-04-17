@@ -1,25 +1,23 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
-	darkMode: ["class"],
-	content: [
+  darkMode: ['class'],
+  content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
 	],
-	prefix: "",
-	theme: {
-		container: {
+  theme: {
+    container: {
 			center: true,
 			padding: '2rem',
 			screens: {
 				'2xl': '1400px'
 			}
 		},
-		extend: {
-			colors: {
+    extend: {
+      colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -53,13 +51,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				quran: {
-					'blue': '#1e3a8a',
-					'teal': '#0d9488',
-					'light': '#e0f2fe',
-					'dark': '#0f172a'
-				},
-			},
+        'quran': {
+          'blue': '#1e3a8a',
+          'teal': '#0d9488',
+          'light': '#e0f2fe',
+          'dark': '#0f172a'
+        },
+      },
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -110,7 +108,7 @@ export default {
 			backdropBlur: {
 				xs: '2px',
 			}
-		}
-	},
-	plugins: [require("tailwindcss-animate")],
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
 } satisfies Config;
