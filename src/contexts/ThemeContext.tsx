@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+// IMPORTANT: Remove this import - it's causing the error
+// import { storage } from '../utils/storage';
 
 type Theme = 'light' | 'dark';
 
@@ -9,33 +11,24 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Simple localStorage wrapper to match how you're using it
-const storage = {
-  getItem: (key: string): string | null => {
-    try {
-      return localStorage.getItem(key);
-    } catch (error) {
-      console.error(`Error getting item ${key}:`, error);
-      return null;
-    }
-  },
-  setItem: (key: string, value: string): void => {
-    try {
-      localStorage.setItem(key, value);
-    } catch (error) {
-      console.error(`Error setting item ${key}:`, error);
-    }
-  }
-};
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = storage.getItem('theme');
-    return (savedTheme as Theme) || 'light';
+    try {
+      // Use localStorage directly instead of the storage import
+      const savedTheme = localStorage.getItem('theme');
+      return (savedTheme as Theme) || 'light';
+    } catch (error) {
+      return 'light';
+    }
   });
 
   useEffect(() => {
-    storage.setItem('theme', theme);
+    try {
+      // Use localStorage directly 
+      localStorage.setItem('theme', theme);
+    } catch (error) {
+      console.error('Error saving theme:', error);
+    }
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
