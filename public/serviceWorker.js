@@ -1,13 +1,12 @@
-
-const CACHE_NAME = 'focus-quran-v1';
-const AUDIO_CACHE_NAME = 'focus-quran-audio-v1';
+const CACHE_NAME = 'quranlify-v1';
+const AUDIO_CACHE_NAME = 'quranlify-audio-v1';
 
 const urlsToCache = [
   '/',
   '/index.html',
-  '/src/index.css',
-  '/src/main.tsx',
-  // Add more app assets here
+  '/manifest.json',
+  '/quran-icon-192.png',
+  '/quran-icon-512.png'
 ];
 
 // Install the service worker
@@ -33,54 +32,40 @@ self.addEventListener('fetch', (event) => {
           return cache.match(event.request)
             .then((response) => {
               if (response) {
-                // Return cached audio
                 return response;
               }
               
-              // Fetch from network if not in cache
               return fetch(event.request)
                 .then((networkResponse) => {
                   if (networkResponse && networkResponse.status === 200) {
-                    // Clone the response to store in cache
-                    const clonedResponse = networkResponse.clone();
-                    cache.put(event.request, clonedResponse);
+                    cache.put(event.request, networkResponse.clone());
                   }
                   return networkResponse;
                 })
                 .catch(() => {
-                  // If both cache and network fail, return a fallback
                   return new Response('Audio not available offline');
                 });
             });
         })
     );
   } else {
-    // Regular caching strategy for non-audio files
+    // Network first, fallback to cache strategy for other resources
     event.respondWith(
-      caches.match(event.request)
+      fetch(event.request)
         .then((response) => {
-          // Cache hit - return response
-          if (response) {
-            return response;
+          // Cache successful responses
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseClone);
+              });
           }
-          return fetch(event.request).then(
-            (networkResponse) => {
-              // Check if we received a valid response
-              if (!networkResponse || networkResponse.status !== 200) {
-                return networkResponse;
-              }
-
-              // Clone the response
-              const responseToCache = networkResponse.clone();
-
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
-
-              return networkResponse;
-            }
-          );
+          return response;
+        })
+        .catch(() => {
+          // If network fails, try cache
+          return caches.match(event.request);
         })
     );
   }
