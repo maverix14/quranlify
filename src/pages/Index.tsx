@@ -14,8 +14,10 @@ const Logo = () => {
   const { theme } = useTheme();
   return (
     <img 
-      src={theme === 'dark' ? '/lovable-uploads/433fb92b-91c4-4d27-9472-c3c91767b9d9.png' : '/lovable-uploads/9ee55ad8-9c60-4271-b852-3037257b4f00.png'} 
-      alt="Quranlify" 
+      src={theme === 'dark' 
+        ? '/Serene Quran Full Header Dark.webp' 
+        : '/Serene Quran Full Header Light.webp'} 
+      alt="Serene Quran" 
       className="h-12 w-auto"
     />
   );
