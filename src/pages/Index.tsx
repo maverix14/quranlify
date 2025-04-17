@@ -18,7 +18,7 @@ const Logo = () => {
         ? '/Serene Quran Full Header Dark.webp' 
         : '/Serene Quran Full Header Light.webp'} 
       alt="Serene Quran" 
-      className="h-12 w-auto"
+      className="h-16 w-auto"
     />
   );
 };
