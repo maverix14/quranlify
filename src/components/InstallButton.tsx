@@ -9,7 +9,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const InstallButton: React.FC = () => {
+interface InstallButtonProps {
+  className?: string;
+}
+
+const InstallButton: React.FC<InstallButtonProps> = ({ className }) => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   
@@ -50,7 +54,7 @@ const InstallButton: React.FC = () => {
     if (choiceResult.outcome === 'accepted') {
       toast({
         title: "Success",
-        description: "Thank you for installing Focus Quran!",
+        description: "Thank you for installing Quranlify!",
         duration: 3000,
       });
       setInstallPrompt(null);
@@ -64,7 +68,7 @@ const InstallButton: React.FC = () => {
     <Button 
       variant="outline" 
       size="icon" 
-      className="btn-glass" 
+      className={className} 
       onClick={handleInstallClick}
     >
       <Download size={20} />

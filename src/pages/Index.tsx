@@ -17,7 +17,7 @@ const Index = () => {
     const hasShownWelcome = sessionStorage.getItem('welcomed');
     if (!hasShownWelcome) {
       toast({
-        title: "Welcome to Focus Quran",
+        title: "Welcome to Quranlify",
         description: "Read one ayah at a time to improve your focus",
         duration: 5000,
       });
@@ -45,20 +45,20 @@ const Index = () => {
   return (
     <QuranProvider>
       <div className="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6">
-        <header className="w-full max-w-2xl mx-auto mb-6 text-center flex justify-between items-center">
-          <InstallButton />
-          <div>
-            <h1 className="text-2xl font-semibold text-quran-blue">Focus Quran</h1>
+        <header className="w-full max-w-2xl mx-auto mb-6 glass-card p-4 flex justify-between items-center">
+          <InstallButton className="btn-glass" />
+          <div className="flex flex-col items-center justify-center">
+            <h1 className="text-2xl font-semibold text-quran-blue font-arabic">Quranlify</h1>
             <p className="text-sm text-gray-600">One ayah at a time</p>
           </div>
-          <SettingsPanel />
+          <SettingsPanel className="btn-glass" />
         </header>
         
         <main className="flex-1 w-full flex flex-col items-center justify-center mb-6">
           <AyahDisplay />
         </main>
         
-        <footer className="w-full">
+        <footer className="w-full fixed bottom-0 left-0 right-0 pb-4 pt-2 px-4 bg-transparent">
           <NavigationControls onOpenSurahList={handleOpenSurahList} />
         </footer>
         
